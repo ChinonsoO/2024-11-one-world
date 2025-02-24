@@ -104,7 +104,7 @@ describe("MembershipERC1155 Contract", function () {
     });
 
     beforeEach(async function () {
-        membershipERC1155 = await MembershipERC1155.deploy();
+        membershipERC1155 = await MembershipERC1155.deploy({ gasLimit: 8_000_000 });
         await membershipERC1155.deployed();
     
         const ERC20 = await ethers.getContractFactory("OWPERC20");

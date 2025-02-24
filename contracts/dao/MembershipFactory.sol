@@ -38,6 +38,7 @@ contract MembershipFactory is AccessControl, NativeMetaTransaction {
         membershipImplementation = _membershipImplementation;
         proxyAdmin = new ProxyAdmin(msg.sender);
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        //q- What is the external CAller role?
         _grantRole(EXTERNAL_CALLER, msg.sender);
     }
 
@@ -58,8 +59,12 @@ contract MembershipFactory is AccessControl, NativeMetaTransaction {
         require(daoConfig.noOfTiers == tierConfigs.length, "Invalid tier input.");
         require(daoConfig.noOfTiers > 0 && daoConfig.noOfTiers <= TIER_MAX, "Invalid tier count.");
         require(getENSAddress[daoConfig.ensname] == address(0), "DAO already exist.");
+
+        //q- sponsored DAO's must have 7 tiers?
         if (daoConfig.daoType == DAOType.SPONSORED) {
             require(daoConfig.noOfTiers == TIER_MAX, "Invalid tier count for sponsored.");
+            //q- what stopping us from creating a sponsored DAO, and then having certiain tiers have members of 0.
+            //q- wait is amount the number of memebers already in that DAO?
         }
 
         // enforce maxMembers
@@ -111,6 +116,10 @@ contract MembershipFactory is AccessControl, NativeMetaTransaction {
         uint256 maxMembers = 0;
 
         // Preserve minted values and adjust the length of dao.tiers
+        //tierConfigs - 100, 200, 300, 400
+        //daoConfigsOrig - 200, 300, 400, 500, 600, 700
+        //tierConfigsNew - 200, 300, 400, 500 (removed 600, 700)
+
         for (uint256 i = 0; i < tierConfigs.length; i++) {
             if (i < dao.tiers.length) {
                 tierConfigs[i].minted = dao.tiers[i].minted;
@@ -119,10 +128,12 @@ contract MembershipFactory is AccessControl, NativeMetaTransaction {
 
         // Reset and update the tiers array
         delete dao.tiers;
+        //q- we deleted the dao tiers of, if tierConfigs.length != daoTiers.length and less than daoTiers.length we lose the config of upper tiers.
         for (uint256 i = 0; i < tierConfigs.length; i++) {
             dao.tiers.push(tierConfigs[i]);
             maxMembers += tierConfigs[i].amount;
         }
+        //q- daoConfigsNew - 200, 300, 400, 500 (We deleted Tier configs for tiers 5 and 6) is this intentional?
 
         // updating the ceiling limit acc to new data
         if(maxMembers > dao.maxMembers){
@@ -138,11 +149,14 @@ contract MembershipFactory is AccessControl, NativeMetaTransaction {
     /// @param daoMembershipAddress The address of the DAO membership NFT
     /// @param tierIndex The index of the tier to join
     function joinDAO(address daoMembershipAddress, uint256 tierIndex) external {
+        //q- Where is the check to make sure a user can't purchase all the tiers, or purchase more than 2 tiers.
         require(daos[daoMembershipAddress].noOfTiers > tierIndex, "Invalid tier.");
         require(daos[daoMembershipAddress].tiers[tierIndex].amount > daos[daoMembershipAddress].tiers[tierIndex].minted, "Tier full.");
+        //q- Ohhh It seems like we have a check here that says the amount at a tier should be > minted, we don't enforce this anywhere else
+        //q- what if we create a DAO where a Tier cannot be accessed by anybody, Is ths intended?
         uint256 tierPrice = daos[daoMembershipAddress].tiers[tierIndex].price;
         uint256 platformFees = (20 * tierPrice) / 100;
-        daos[daoMembershipAddress].tiers[tierIndex].minted += 1;
+        daos[daoMembershipAddress].tiers[tierIndex].minted += 1; //q- looks like minted keeps track of number of people in each tier.
         IERC20(daos[daoMembershipAddress].currency).transferFrom(_msgSender(), owpWallet, platformFees);
         IERC20(daos[daoMembershipAddress].currency).transferFrom(_msgSender(), daoMembershipAddress, tierPrice - platformFees);
         IMembershipERC1155(daoMembershipAddress).mint(_msgSender(), tierIndex, 1);
@@ -154,9 +168,13 @@ contract MembershipFactory is AccessControl, NativeMetaTransaction {
     /// @param fromTierIndex The current tier index of the user
     function upgradeTier(address daoMembershipAddress, uint256 fromTierIndex) external {
         require(daos[daoMembershipAddress].daoType == DAOType.SPONSORED, "Upgrade not allowed.");
-        require(daos[daoMembershipAddress].noOfTiers >= fromTierIndex + 1, "No higher tier available.");
-        IMembershipERC1155(daoMembershipAddress).burn(_msgSender(), fromTierIndex, 2);
-        IMembershipERC1155(daoMembershipAddress).mint(_msgSender(), fromTierIndex - 1, 1);
+        //q- Seems we only allow upgrading for a sponsored Tier so we shouldn't allow a user to buy multiple tiers for non sponsored.
+        require(daos[daoMembershipAddress].noOfTiers >= fromTierIndex + 1, "No higher tier available."); 
+        IMembershipERC1155(daoMembershipAddress).burn(_msgSender(), fromTierIndex, 2); //q- why are we burning 2?, and only minting one
+        //a- we assume the user bought 2 NFTs on the same tier and is now looking to upgrade by merging them together so we burn the 2.
+        IMembershipERC1155(daoMembershipAddress).mint(_msgSender(), fromTierIndex - 1, 1); //fromTierIndex - 1 because we're moving up in tiers.
+        //q- what if fromTierIndex is 0
+        //a- Reverts due to underflow
         emit UserJoinedDAO(_msgSender(), daoMembershipAddress, fromTierIndex - 1);
     }
 

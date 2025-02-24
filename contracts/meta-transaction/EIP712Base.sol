@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.22;
 
-
+//q- WHat is the purpose of this contract?
 contract EIP712Base {
     struct EIP712Domain {
         string name;

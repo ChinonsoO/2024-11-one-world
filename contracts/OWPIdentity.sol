@@ -35,6 +35,7 @@ contract OWPIdentity is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, 
         _mint(account, id, amount, data);
     }
 
+    //q- what is mintBatch and burnBatch doing?
     function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
         public
         onlyRole(MINTER_ROLE)
@@ -69,6 +70,7 @@ contract OWPIdentity is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, 
     }
 
     // The following functions are overrides required by Solidity.
+    //What is the function doing, what does a from of address(0) mean?
     function _update(
         address from,
         address to,
@@ -79,6 +81,7 @@ contract OWPIdentity is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, 
         super._update(from, to, ids, amounts);
     }
 
+    //q- What is the function doing?
     function _msgSender()
         internal
         view

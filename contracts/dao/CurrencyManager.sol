@@ -89,6 +89,7 @@ contract CurrencyManager is ICurrencyManager, AccessControl {
   ) external view override returns (address[] memory, uint256) {
     uint256 length = size;
 
+    //  q- Could underflow resulting in revert maybe return a empty array if cursor > whitelistedCurrencies.length?
     if (length > _whitelistedCurrencies.length() - cursor) {
       length = _whitelistedCurrencies.length() - cursor;
     }
