@@ -36,7 +36,7 @@ contract MembershipERC1155 is ERC1155Upgradeable, AccessControlUpgradeable, IMem
     event Profit(uint256 amount);
 
     constructor(){
-        _disableInitializers();
+        // _disableInitializers();
     }
 
     function initialize(

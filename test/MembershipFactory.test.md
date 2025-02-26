@@ -10,11 +10,11 @@ describe("MembershipFactory", function () {
     [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
     
     CurrencyManager = await ethers.getContractFactory("CurrencyManager");
-    currencyManager = await CurrencyManager.deploy();
+    currencyManager = await CurrencyManager.deploy({gasLimit: 9000000});
     await currencyManager.deployed();
 
     MembershipERC1155 = await ethers.getContractFactory('MembershipERC1155');
-    const membershipImplementation = await MembershipERC1155.deploy();
+    const membershipImplementation = await MembershipERC1155.deploy({gasLimit: 9000000});
     await membershipImplementation.deployed();
 
     MembershipFactory = await ethers.getContractFactory("MembershipFactory");
@@ -22,7 +22,7 @@ describe("MembershipFactory", function () {
     await membershipFactory.deployed();
 
     const ERC20 = await ethers.getContractFactory("OWPERC20");
-    testERC20 = await ERC20.deploy('OWP', 'OWP');
+    testERC20 = await ERC20.deploy('OWP', 'OWP', {gasLimit: 9000000});
     await testERC20.deployed();
     // await currencyManager.addCurrency(testERC20.address);
     DAOType = { GENERAL: 0, PRIVATE: 1, SPONSORED: 2 };

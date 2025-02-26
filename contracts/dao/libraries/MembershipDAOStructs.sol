@@ -31,7 +31,7 @@ struct DAOInputConfig {
 
 //q- What does each tier represent.
 struct TierConfig {
-    uint256 amount; //max number of tier members
+    uint256 amount; //max number of minted tokens
     uint256 price;
     uint256 power;
     uint256 minted;
