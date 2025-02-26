@@ -4,10 +4,10 @@ pragma solidity 0.8.22;
 import { IMembershipERC1155 } from "./interfaces/IERC1155Mintable.sol";
 import { ICurrencyManager } from "./interfaces/ICurrencyManager.sol";
 import { DAOConfig, DAOInputConfig, TierConfig, DAOType, TIER_MAX } from "./libraries/MembershipDAOStructs.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {ProxyAdmin} from "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import { NativeMetaTransaction } from "../meta-transaction/NativeMetaTransaction.sol";
 
 /// @title Membership Factory Contract
@@ -80,7 +80,7 @@ contract MembershipFactory is AccessControl, NativeMetaTransaction {
             abi.encodeWithSignature("initialize(string,string,string,address,address)", daoConfig.ensname, "OWP", baseURI, _msgSender(), daoConfig.currency)
         );
 
-        DAOConfig storage dao = daos[address(proxy)];
+        DAOConfig storage dao = daos[address(proxy)]; //q- This assignment seems to be redundant/filpped
         dao.ensname = daoConfig.ensname;
         dao.daoType = daoConfig.daoType;
         dao.currency = daoConfig.currency;

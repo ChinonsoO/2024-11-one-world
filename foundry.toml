@@ -1,7 +1,8 @@
 [profile.default]
 src = "src"
 out = "artifacts"
-libs = ["node_modules"]
+libs = ["lib"]
+solc="0.8.22"
 remappings = [
     "@openzeppelin/=node_modules/@openzeppelin/",
     "eth-gas-reporter/=node_modules/eth-gas-reporter/",
